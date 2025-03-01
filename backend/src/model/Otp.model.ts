@@ -8,7 +8,6 @@ const OTPSchema: Schema<IOtpData> = new Schema({
     attempts: { type: Number, default: 0 },
     reSendCount: { type: Number, default: 0 },
     lastResendTime: { type: Date, default: null },
-    role : {type : String , default : 'user'}
 },
     {timestamps : true},
 )
