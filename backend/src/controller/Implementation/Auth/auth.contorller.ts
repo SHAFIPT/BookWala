@@ -92,5 +92,21 @@ export class AuthController implements IAuthController{
           next(error);
         }
       }
+
+      public async register(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+          const {name, email, password } = req.body;
+          const user = await this.authService.register(name, email, password);
+          res.status(200).json({
+            success: true,
+            message: "Password updated successfully",
+            data: user
+          });
+        } catch (error) {
+          next(error);
+        }
+      }
+     
+      }
+
     
-}

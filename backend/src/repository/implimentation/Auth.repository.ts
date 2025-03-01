@@ -15,4 +15,8 @@ export class AuthRepository extends BaseRepository<IUser> implements IAuthReposi
   async updatePassword(userId: string, newPassword: string): Promise<IUser | null> {
     return this.update(userId, { password: newPassword });
   }
+  async register(name: string, email: string, password: string): Promise<IUser> {
+    const newUser = await this.create({ name, email, password });
+    return newUser;
+  }
 }
