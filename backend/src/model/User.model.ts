@@ -12,6 +12,6 @@ const UserSchema: Schema<IUser> = new Schema({
   lastLogin: { type: Date, default: null },
 }, {timestamps : true});
 
-const User = mongoose.model<IUser>('Users', UserSchema)
+const User = mongoose.model<IUser>('User', UserSchema)
 
 export default User;
