@@ -1,14 +1,14 @@
-import mongoose, { Document, ObjectId } from "mongoose";
-export interface IUser extends Document{
-    _id: ObjectId | null;
-    name: string | null;
-    email: string | null;
-    password: string | null;
-    ProfilePic: string | null;
-    role: string | null;
-    isBlocked: boolean | null;
-    Chat: ObjectId | null;
-    refreshToken: string[];
-    lastLogin: Date | null;
-    toObject(): IUser; 
-}   
+import { Document } from "mongoose";
+
+export interface IUser extends Document {
+  name?: string;
+  email: string;
+  password?: string;
+  ProfilePic?: string;
+  role?: string;
+  isBlocked?: boolean;
+  refreshToken?: string[];
+  lastLogin?: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
