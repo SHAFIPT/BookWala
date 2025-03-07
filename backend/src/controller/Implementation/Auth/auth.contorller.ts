@@ -21,7 +21,9 @@ export class AuthController implements IAuthController{
     public async sendOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
 
-            const { email} = req.body;
+            const { email } = req.body;
+            
+            console.log('Thsi si the reseved dataa ;;',email)
 
             const result = await this.otpService.sendOtp(email);
             
