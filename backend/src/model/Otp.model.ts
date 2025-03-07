@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import { IOtpData } from "../types/otp.types";
 
 const OTPSchema: Schema<IOtpData> = new Schema({
-    email: { type: String, required: true },
+    email: { type: String },
     otp: { type: String, required: true },
     expirationTime: { type: Date, required: true },
     attempts: { type: Number, default: 0 },

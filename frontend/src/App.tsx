@@ -1,9 +1,14 @@
 import './App.css';
-
+import {  Route, Routes } from 'react-router-dom'; 
+import Rotues from './routes/router';
+import { ToastContainer } from 'react-toastify';
 function App() {
   return (
-    <div className="flex items-center justify-center h-screen text-3xl font-bold">
-      <p >hello world</p>
+    <div className="min-h-screen bg-background text-foreground ">
+      <ToastContainer theme="dark" />
+      <Routes>
+        <Route path="/*" element={<Rotues />} />
+      </Routes>
     </div>
   );
 }
