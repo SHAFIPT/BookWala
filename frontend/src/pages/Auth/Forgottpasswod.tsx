@@ -5,26 +5,27 @@ import { RootState } from '../../store/store';
 import { setError } from '../../store/slice/userSlice';
 import { emailValidate } from '../../utils/ValidateRegister';
 
-interface ForgotPasswordProps {
-    conform: (email: string) => Promise<void>;
-    onCancel: () => void;
-    message: string;
-    title: string;
-    onVerify: (otp: string) => void;
+interface ForgottpasswodProps {
+  conform: (email: string) => Promise<boolean | void>; // The return type can be adjusted as needed
+  onCancel: () => void;
+  message: string;
+  title: string;
+  onVerify: (otpValue: string, email: string) => void;
 }
 
-const Forgottpasswod: React.FC<ForgotPasswordProps> = ({
-    conform,
-    onCancel,
-    message,
-    title,
-    onVerify
-}) => {
+const Forgottpasswod = ({
+  conform,
+  onCancel,
+  message,
+  title,
+  onVerify,
+}: ForgottpasswodProps) => {
 
     const error : { email?: string } = useSelector((state: RootState) => state.user.error) ?? {}
 
     const [email, setEmail] = useState('')
-    const [otpSent, setOtpSent] = useState(false)
+  const [otpSent, setOtpSent] = useState(false)
+  console.log('Thsi sithe otpSent ::::: ',otpSent)
     const [otp, setOtp] = useState(["", "", "", ""]);
     const dispatch = useDispatch()
     
@@ -63,15 +64,13 @@ const Forgottpasswod: React.FC<ForgotPasswordProps> = ({
     if (otpValue.length !== 4) {
       return toast.error("OTP must be 4 digits");
     }
-    onVerify(otpValue);
+    onVerify(otpValue, email);
   };
  
   return (
     <>
   
-    <div
-      className={`fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 transition-opacity duration-300 opacity-100`}
-    >
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm z-50 transition-opacity duration-300">
       <div
        className={`bg-white rounded-lg shadow-lg max-w-md w-[400pc] p-6 transform transition-all duration-300 translate-y-0 opacity-100`}
       >

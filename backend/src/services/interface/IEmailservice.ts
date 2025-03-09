@@ -1,4 +1,4 @@
 export interface IEmailService {
-    sendOtpEmail(to: string, otp: string): Promise<void>;
+    sendOtpEmail(to: string, otp: string): Promise<boolean>;
   }
   

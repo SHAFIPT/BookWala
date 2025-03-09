@@ -6,22 +6,29 @@ export class EmailService implements IEmailService {
 
   constructor() {
     this.transporter = nodemailer.createTransport({
-        service: 'Gmail',
+        service: 'gmail', 
         auth: {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS,
         },
-    });
+    });    
   }
 
-  async sendOtpEmail(to: string, otp: string): Promise<void> {
-    const mailOptions = {
-      from: '"Your App Name" <no-reply@yourapp.com>',
-      to,
+  async sendOtpEmail(email: string, otp: string): Promise<boolean> {
+    try {
+      const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to : email,
       subject: 'Your OTP Code',
       text: `Your OTP is: ${otp}. It is valid for a limited time.`,
     };
+      const info = await this.transporter.sendMail(mailOptions)
+      console.log('Email sent: ' + info.response)
+        return true;
 
-    await this.transporter.sendMail(mailOptions);
+    } catch (error) {
+       console.error('Error sending email:', error);
+        return false
+    }
   }
 }
