@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import { Document, ObjectId } from "mongoose";
 
 export interface IUser extends Document {
   name?: string;
@@ -11,4 +11,13 @@ export interface IUser extends Document {
   lastLogin?: Date;
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+
+export interface IAdmin extends Document {
+  _id: ObjectId;
+  email: string | null;
+  password: string | null;
+  role: string | null;
+  refreshToken: string [] | null;
 }

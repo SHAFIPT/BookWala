@@ -5,7 +5,7 @@ const api = userAxiosInstance
 
 export const loginUser = async (email: string, password: string , role : string) => {
     try {
-        const response = api.post('/api/auth/login', {
+        const response = await api.post('/api/auth/login', {
            email, password ,role
         })
         return response
@@ -18,8 +18,7 @@ export const loginUser = async (email: string, password: string , role : string)
 export const sendRegistrationOTP = async (email: string) => {
     try {
 
-        const response = api.post('/api/auth/sendOtp', email    
-        )
+        const response = await api.post('/api/auth/sendOtp', { email });
         return response
         
     } catch (error) {
@@ -30,7 +29,7 @@ export const sendRegistrationOTP = async (email: string) => {
 export const verifyRegistrationOTP = async (email: string, otp: string) => {
     try {
 
-        const response = api.post('/api/auth/verifyOTP', {
+        const response = await api.post('/api/auth/verifyOTP', {
             email,
             otp
         })
@@ -42,12 +41,12 @@ export const verifyRegistrationOTP = async (email: string, otp: string) => {
         throw error;
     }
 }
-export const resetPassword = async (email: string, password: string) => {
+export const resetPassword = async (email: string, newPassword: string) => {
     try {
 
-        const response = api.post('/api/auth/resetPassword', {
+        const response = await api.post('/api/auth/resetPassword', {
             email,
-            password
+            newPassword
         })
 
         return response
@@ -60,7 +59,7 @@ export const resetPassword = async (email: string, password: string) => {
 export const sendPasswordResetOTP = async (email: string) => {
     try {
 
-        const response = api.post('/api/auth/sendPasswordResetOTP', {
+        const response = await api.post('/api/auth/sendPasswordResetOTP', {
             email,
         })
 
@@ -72,10 +71,13 @@ export const sendPasswordResetOTP = async (email: string) => {
     }
 }
 
-export const registerUser = async (email: string, password: string, role: string, name?: string) => {
+export const registerUser = async (email: string, name: string, password: string, role: string) => {
     try {
-        const response = await api.post('/api/auth/registerUser', {
-            user: { email, name, password, role }
+         const response = await api.post('/api/auth/registerUser', {
+            email, 
+            name, 
+            password, 
+            role
         });
 
         return response;
@@ -89,7 +91,7 @@ export const registerUser = async (email: string, password: string, role: string
 export const userLogout = async () => {
     try {
 
-        const response = api.post('/api/auth/logout')
+        const response = await api.post('/api/auth/logout')
         return response
         
     } catch (error) {

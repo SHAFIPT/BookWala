@@ -5,7 +5,7 @@ const connectDB = async () => {
     console.log(mongoUrl)
     if (!mongoUrl) {
         throw new Error("MONGO_URI is not defined in the environment variables");
-    }
+    }  
     try {
         await mongoose.connect(mongoUrl)
         console.log('mongoose connected..')

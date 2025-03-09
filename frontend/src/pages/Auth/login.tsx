@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import registerLogo from '../../assets/login_enhanced.png'
 import logo from '../../assets/BookWala.png'
 import { setError, setLoading } from '../../store/slice/userSlice'
-import { validateLogin } from '../../utils/ValidateRegister'
+import './lodingBody.css'
+import { validateLogin, validatePassword } from '../../utils/ValidateRegister'
 import { toast } from 'react-toastify'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../../store/store'
@@ -11,12 +12,18 @@ import useAuth from '../../hooks/useAuth'
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Forgottpasswod from './Forgottpasswod'
 
+
 const Login = () => {
-    const { login ,forgotPassword , verifyOTP } = useAuth()
+    const { login ,forgotPassword ,resetUserPassword, verifyOTP } = useAuth()
     const [showPassword, setShowPassword] = useState(false)
     const [otpSent, setOtpSent] = useState(false)
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const [confirmPassword, setConfirmPassword] = useState('')
     const [forgetpassword, setforgetPassword] = useState(false);
+    const [otp, setOtp] = useState(["", "", "", ""]);
     const [resetPassword, setResetPassword] = useState(false);
+    const otpInputsRef = useRef<(HTMLInputElement | null)[]>([]);
     const [formData, setFormData] = useState({
         email: '',
         password: ''
@@ -26,7 +33,8 @@ const Login = () => {
   const error: {
     email?: string;
     password?: string;
-  } = useSelector((state: RootState) => state.user.error)?? {}
+  } = useSelector((state: RootState) => state.user.error) ?? {}
+  console.log('ths is the erroro :::::',error)
   const loading = useSelector((state : RootState)=> state.user.loading) 
   
   
@@ -35,20 +43,37 @@ const Login = () => {
     };
 
     const handleForgetPassword = async (email: string) => {
+      dispatch(setLoading(true));
+      
+
     if (!email) {
         toast.error("Please enter your email first.");
-        return;
+        dispatch(setLoading(false));
+        return false;  // Explicitly return false
     }
+
+    console.log('This is the email going to send:', email);
 
     const response = await forgotPassword(email);
 
-    if (response.success) {
-        setOtpSent(true);
+    dispatch(setLoading(false)); // Ensure loading state is updated
+
+      if (response?.success) {
+      setEmail(email)
+      setforgetPassword(false);
+      setOtpSent(true);
+        toast.success("OTP sent successfully");
+        return true;
     } else {
-        toast.error('Error in forgetPassword set..')
+        toast.error('Error in forgetPassword set.');
+        setforgetPassword(false);
+        return false;  // Explicitly return false
     }
 };
-    const handleVerifyOtp = async (otp: string, email: string) => {
+
+  const handleVerifyOtp = async (otp: string, email: string) => {
+      console.log('This is the email to send ::::::: ',email)
+      console.log('This is the otp to send ::::::: ',otp)
     if (!otp || otp.length != 4) {
         toast.error("Please Enter valid OTP");
         return null;
@@ -57,14 +82,15 @@ const Login = () => {
     const response = await verifyOTP(email,otp);
 
     if (response.success) {
-        setOtpSent(true);
+       setResetPassword(true);
     } else {
         toast.error('Error in forgetPassword set..')
     }
-};
+  };
     
     
   const handleSubmit = async (e: React.FormEvent) => {
+    console.log('Hi ama ihrere ')
     e.preventDefault();
      
     const formDataError = validateLogin({ email: formData.email, password: formData.password });
@@ -90,7 +116,48 @@ const Login = () => {
         toast.error("An unexpected error occurred.");
       }
     };
+  }
+  const handleOtpChange = (value: string, index: number) => {
+  if (/^\d?$/.test(value)) { // Only allow a single digit
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+
+    // Move focus to the next input field
+    if (value && index < otp.length - 1) {
+      otpInputsRef.current[index + 1]?.focus(); // Correct focus handling
     }
+  }
+  };
+  
+  const handleConfirm = async() => {
+    dispatch(setLoading(true))
+
+    const error = validatePassword(password)
+
+      if (error) {
+      dispatch(setError(error));
+      return toast.error(error.password);
+    }    
+    console.log('Thsi is the passwod to sent in login ;::',password)
+
+    if (password !== confirmPassword) {
+            dispatch(setError({ password: "Passwords do not match" }));
+            return toast.error("Passwords do not match");
+    }
+    
+    const response = await resetUserPassword(password);
+
+    if (response.success) {
+      toast.success('The passwod updated successfullly...')
+      setResetPassword(false)
+      setOtpSent(false)
+      dispatch(setLoading(false))
+    } else {
+      toast.error('Error in reset passwod ')
+    }
+
+  }
     
     const handleCancelation = () => {
     setforgetPassword(false);
@@ -99,6 +166,31 @@ const Login = () => {
   };
   return (
     <>
+      {loading && (
+          <div style={{
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            width: '100%', 
+            height: '100vh',
+            background: 'rgba(255, 255, 255, 0.7)', // Optional: Adds a slight overlay
+            zIndex: 9999
+          }}>
+            <div className="dot-spinner">
+              <div className="dot-spinner__dot"></div>
+              <div className="dot-spinner__dot"></div>
+              <div className="dot-spinner__dot"></div>
+              <div className="dot-spinner__dot"></div>
+              <div className="dot-spinner__dot"></div>
+              <div className="dot-spinner__dot"></div>
+              <div className="dot-spinner__dot"></div>
+              <div className="dot-spinner__dot"></div>
+            </div>
+          </div>
+        )}
         {forgetpassword && (
           <Forgottpasswod
             onVerify={handleVerifyOtp}
@@ -107,7 +199,110 @@ const Login = () => {
             message="Enter your email"
             title="Forgot Password"
           />
-        )}
+      )}
+      
+     {otpSent && (
+  <div className="fixed inset-0 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm z-50 transition-opacity duration-300">
+    <div className="bg-white rounded-lg shadow-lg max-w-md p-6 w-96 transform transition-all duration-300 translate-y-0 opacity-100">
+      <h2 className="text-lg font-semibold text-center text-gray-800">Enter OTP</h2>
+
+      {/* OTP Input Fields */}
+      <div className="flex justify-center space-x-2 mt-4">
+        {otp.map((digit, index) => (
+          <input
+            key={index}
+            ref={(el) => { otpInputsRef.current[index] = el; }}
+            type="text"
+            value={digit}
+            onChange={(e) => handleOtpChange(e.target.value, index)}
+            maxLength={1}
+            className="w-10 h-10 bg-white text-black text-center border border-orange-300 focus:outline-none rounded-md focus:border-orange-500"
+          />
+        ))}
+      </div>
+
+      {/* Buttons */}
+      <div className="flex justify-end space-x-4 mt-6">
+        <button
+          onClick={() => setOtpSent(false)}
+          className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition ease-in-out"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={() => handleVerifyOtp(otp.join(''), email)}
+          className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600 transition ease-in-out"
+        >
+          Verify
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+      
+      {resetPassword && (
+       <div className="fixed inset-0 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm z-50 transition-opacity duration-300">
+      <div
+        className={`bg-white rounded-lg shadow-lg max-w-md w-full p-6 transform transition-all duration-300 `}
+      >
+        <h2 className="text-lg font-semibold text-center text-gray-800">
+          ResetPassword
+        </h2>
+        <p className="text-gray-600 mt-2">Enter new Passwod</p>
+
+        <div className="flex flex-col justify-center mt-4">
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              id="password"
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter new password"
+              className="w-full px-3 bg-white text-black py-2 border border-orange-300 focus:outline-none rounded-md focus:border-orange-500"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-2 text-gray-500"
+            >
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+          </div>
+          {error?.password && (
+            <p className="text-red-500 text-sm mt-1">{error.password}</p>
+          )}
+        </div>
+
+        <div className="flex flex-col justify-center mt-4">
+          <input
+            type={showPassword ? "text" : "password"}
+            name="confirmPassword"
+            id="confirmPassword"
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Confirm new password"
+            className="w-full px-3 bg-white text-black py-2 border border-orange-300 focus:outline-none rounded-md focus:border-orange-500"
+          />
+        </div>
+
+        <div className="flex justify-end space-x-4 mt-6">
+          <button
+            onClick={() => setResetPassword(false)}
+            className="px-4 py-2 w-full bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition ease-in-out"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleConfirm}
+            className="px-4 py-2 w-full bg-orange-500 text-white rounded hover:bg-orange-600 transition ease-in-out"
+           >
+             confirm
+          </button>
+        </div>
+      </div>
+    </div>
+      )}
+
    
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Left side gradient - full height on mobile */}
@@ -149,7 +344,7 @@ const Login = () => {
             Login
           </h1>
 
-          <form className="space-y-12" onCanPlay={handleSubmit}>
+          <form className="space-y-12" onSubmit={handleSubmit}>
             {/* Name field with floating label */}
 
             {/* Email field with floating label */}
@@ -260,9 +455,9 @@ const Login = () => {
 
           {/* Forgot Password Link */}
           <div className="mt-4 text-start" onClick={() => setforgetPassword(true)}>
-            <a href="#" className="text-blue-600 font-medium hover:underline">
+            <div  className="text-blue-600 font-medium hover:underline">
               Forgot Password?
-            </a>
+            </div>
           </div>
 
           {/* New User Registration */}

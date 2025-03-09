@@ -1,3 +1,4 @@
+import { model } from 'mongoose';
 import OtpModel from "../../model/Otp.model";
 import { IOtpData } from "../../types/otp.types";
 import { generateExpirationTime, generateOtp } from "../../utils/otpUtils";
@@ -20,7 +21,7 @@ export class OtpRepository
         email,
         otp,
         expirationTime,
-        attempts: 0,
+        attempts: 0,   
         reSendCount: 0,
         lastResendTime: null,
       });
@@ -33,7 +34,7 @@ export class OtpRepository
 
   async verifyOtp(email: string, otp: string): Promise<boolean> {
     try {
-      const otpRecord = await this.findOne({ email });
+      const otpRecord = await OtpModel.findOne({ email }).sort({ createdAt: -1 });
 
       if (!otpRecord) throw new Error("OTP not found.");
       if (otpRecord.otp !== otp) throw new Error("Invalid OTP.");
@@ -45,12 +46,12 @@ export class OtpRepository
     } catch (error) {
       console.error(error);
       throw error;
-    }
+    }   
   }
 
   async resendOtp(email: string): Promise<IOtpData | null> {
     try {
-      const existingOtp = await this.findOne({ email });
+      const existingOtp = await OtpModel.findOne({ email })
 
       if (existingOtp && existingOtp.reSendCount >= 3) {
         throw new Error("Maximum OTP resend limit reached.");

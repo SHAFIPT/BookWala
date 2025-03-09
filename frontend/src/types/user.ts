@@ -1,9 +1,9 @@
 export interface IUser {
-    _id: string;
+    _id?: string;
     name: string;
     email: string;
-    role: string;
+    role?: string;
     profilePicture: string;
-    isBlocked: string;
-    password : string
+    isBlocked?: string;
+    password ?: string
 }  

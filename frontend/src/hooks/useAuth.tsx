@@ -25,6 +25,7 @@ export const useAuth = () => {
             const response = await loginUser(email, password ,role)
             console.log('Thsi is the response login ;;;;;',response)
             if (response.status === 200) {
+                console.log('Thsi is  the rejpsonfe ;: ',response)
             const { user, accessToken, message } = response.data;
 
             localStorage.setItem("token", accessToken);
@@ -45,6 +46,7 @@ export const useAuth = () => {
 
     const sendOTP = async (email: string, name: string, password :string ) => {
         try {
+            console.log('Thsi is the emial to send ;;;00',email)
             const response = await sendRegistrationOTP(email)
             if (response.status == 200) {
                 setIsOtpSent(true)
@@ -66,7 +68,11 @@ export const useAuth = () => {
         if (!finalEmail) {
             return { success: false, error: "Email is required" };
         }
-        const response = await verifyRegistrationOTP(finalEmail, otp);
+        
+        console.log('Ths  is the emial going to send ok::',finalEmail)
+        console.log('Ths  is the OTP going to send ok::',otp)
+            const response = await verifyRegistrationOTP(finalEmail, otp);
+            console.log('Thsi sit erepsonfse data ;;;;',response)
         if (response?.status === 200) {
             setOtpVerified(true);
             setIsOtpSent(false);
@@ -86,10 +92,11 @@ export const useAuth = () => {
 };
 
      const forgotPassword = async (email: string) => {
-        try {
-            const response = await sendPasswordResetOTP(email);
+         try {
+             console.log('Thsi si teh aut to send emial ::',email)
+             const response = await sendPasswordResetOTP(email);
+             console.log('This is the forget password response ::: ',response)
             if (response.status === 200) {
-                setIsOtpSent(true);
                 setResetPasswordEmail(email);
                 return { success: true };
             }
@@ -115,6 +122,8 @@ export const useAuth = () => {
                 };
             }
 
+            console.log('Thsi is the resetPasswod Email :: ot pass to backend ;:',resetPasswordEmail)
+            console.log('this is th paswod to send new paasowd:::::',newPassword)
             const response = await resetPassword(resetPasswordEmail, newPassword);
             
             if (response.status === 200) {
@@ -157,7 +166,7 @@ const register = async (isOTPVerified = false) => {
             role
         );
 
-        if (response.status === 201) {
+        if (response.status === 200) {
             const { user, accessToken } = response.data.data;
             console.log('Registration successful:', response);
 
@@ -204,7 +213,7 @@ const register = async (isOTPVerified = false) => {
                 await persistor.purge(); // Clear persisted storage
                 return { success: true };
             }
-                
+            return { success: false, error: 'Logout failed' };     
         } catch (error) {
             console.error(error);
             return { success: false, error: 'logout Faild' };
@@ -225,6 +234,7 @@ const register = async (isOTPVerified = false) => {
         logout,
         resetOTPStates,
         isOtpSent,
+        setIsOtpSent,
         otpVerified,
         forgotPassword,
         resetUserPassword

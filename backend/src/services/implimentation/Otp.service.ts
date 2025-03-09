@@ -13,9 +13,13 @@ export class OtpService implements IOTPservices {
   async sendOtp(email: string): Promise<IOtpData | null> {
     const otpRecord = await this.otpRepo.createOtp(email);
 
+    console.log('this si teh createdopt ;;;',otpRecord)
+
     if (otpRecord) {
       await this.emailService.sendOtpEmail(email, otpRecord.otp);
     }
+
+    console.log('Thsi is the otpRecode ;;;;;',otpRecord)
 
     return otpRecord;
   }

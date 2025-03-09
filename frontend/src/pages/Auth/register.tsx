@@ -1,4 +1,5 @@
 import registerLogo from '../../assets/register image_enhanced.png'
+import './lodingBody.css'
 import logo from '../../assets/BookWala.png'
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import useAuth from '../../hooks/useAuth';
@@ -8,10 +9,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
 import { setError, setLoading } from '../../store/slice/userSlice';
 import { toast } from 'react-toastify';
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import useGoogleAuth from '../../hooks/GoogleLoginButton';
 
 const Register = () => {
-    const { sendOTP, verifyOTP, register, isOtpSent } = useAuth();
+    const { sendOTP, verifyOTP, register, isOtpSent ,setIsOtpSent} = useAuth();
     const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         name: "",
@@ -20,9 +22,11 @@ const Register = () => {
     });
     const [otp, setOtp] = useState(["", "", "", ""]);
     const [isVisible, setIsVisible] = useState(false);
-    const [timer, setTimer] = useState(30); 
+    const [timer, setTimer] = useState(60); 
     const loading = useSelector((state: RootState) => state.user.loading)
     const dispatch = useDispatch()
+    const navigate = useNavigate()
+    const { loginWithGoogle } = useGoogleAuth();
     const error: {
       name?: string;  
       email?: string;
@@ -33,7 +37,8 @@ const Register = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-    const handleSendOTP = async (e: React.FormEvent) => {
+  const handleSendOTP = async (e: React.FormEvent) => {
+      dispatch(setLoading(true));
     e.preventDefault();
     
     const formDataError = ValidateRegister({ name: formData.name, email: formData.email, password: formData.password });
@@ -59,7 +64,7 @@ const Register = () => {
       }
       toast.success('OTP sent successfully.');
       setIsVisible(true);
-      setTimer(30);
+      setTimer(60);
       dispatch(setLoading(false))
     };
     }
@@ -93,7 +98,7 @@ const Register = () => {
         dispatch(setLoading(true));
         try {
             const otpCode = otp.join('');
-        const response = await verifyOTP(otpCode);
+         const response = await verifyOTP(null, otpCode);
         
             console.log('Thsi is the verify otp response...', response)
             
@@ -115,6 +120,7 @@ const Register = () => {
             
             toast.success('Registration completed successfully!');
             setIsVisible(false);
+            navigate('/')
         } catch (error) { 
             console.error(error)
             toast.error('An unexpected error occurred. Please try again.');
@@ -123,8 +129,9 @@ const Register = () => {
         }
     };
 
-     const onClose = () => {
-        setIsVisible(false);
+  const onClose = () => {
+       console.log("Closing modal...");
+        setIsOtpSent(false);
     };
 
   const handleResend = async () => {
@@ -132,7 +139,7 @@ const Register = () => {
         const response = await sendOTP(formData.email, formData.name, formData.password );
         if (response.success) {
             toast.success("OTP resent successfully.");
-            setTimer(30);
+            setTimer(60);
             dispatch(setLoading(false))
         } else {
             toast.error("Failed to resend OTP.");
@@ -143,8 +150,34 @@ const Register = () => {
 
     return (
       <>
+        {loading && (
+          <div style={{
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            width: '100%', 
+            height: '100vh',
+            background: 'rgba(255, 255, 255, 0.7)', // Optional: Adds a slight overlay
+            zIndex: 9999
+          }}>
+            <div className="dot-spinner">
+              <div className="dot-spinner__dot"></div>
+              <div className="dot-spinner__dot"></div>
+              <div className="dot-spinner__dot"></div>
+              <div className="dot-spinner__dot"></div>
+              <div className="dot-spinner__dot"></div>
+              <div className="dot-spinner__dot"></div>
+              <div className="dot-spinner__dot"></div>
+              <div className="dot-spinner__dot"></div>
+            </div>
+          </div>
+        )}
         {isOtpSent && (
-          <div className="modal-overlay fixed inset-0 z-50 flex justify-center items-center bg-black bg-opacity-80">
+          <div className="fixed inset-0 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm z-50 transition-opacity duration-300">
+
             <form
               className="otp-Form bg-white p-6 rounded-lg shadow-lg flex flex-col items-center"
               onSubmit={handleSubmit}
@@ -184,7 +217,8 @@ const Register = () => {
                   {timer > 0 ? (
                     `Resend available in ${timer}s`
                   ) : (
-                    <button
+                      <button
+                      type='button'
                       className="resendBtn text-blue-500"
                       onClick={handleResend}
                     >
@@ -196,6 +230,7 @@ const Register = () => {
 
               {/* Close Button */}
               <button
+                type='button'
                 className="exitBtn absolute top-2 right-2 text-xl"
                 onClick={onClose}
               >
@@ -354,8 +389,10 @@ const Register = () => {
               </div>
 
               {/* Google Login */}
+              
               <div className="flex justify-center">
-                <button className="border w-full text-black flex gap-2 items-center justify-center rounded-[9px] bg-white px-4 py-3  font-medium text-sm hover:bg-zinc-300 transition-all ease-in duration-200">
+                  <button className="border w-full text-black flex gap-2 items-center justify-center rounded-[9px] bg-white px-4 py-3  font-medium text-sm hover:bg-zinc-300 transition-all ease-in duration-200"
+                    onClick={() => loginWithGoogle()}>
                   <svg
                     viewBox="0 0 48 48"
                     xmlns="http://www.w3.org/2000/svg"
